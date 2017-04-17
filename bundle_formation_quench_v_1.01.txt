@@ -1,0 +1,266 @@
+finish
+/clear
+
+
+/cwd, 'F:\Abdullah\Writing\Articles\Journal002\Quench\1542_3.0T\Geometry\ANSYS'
+/TITLE,Bundle_1, Review_Paper_1
+/filename, Bundle1Review Paper, 1
+
+pi = 3.14159
+tol = 1e-6
+!mgb2_loc_r = 0.32603e-3
+!mgb2_loc_z = 0.49142e-3
+
+!nb_loc_r = 0.7217e-3
+!nb_loc_z = 1.0878e-3
+
+!cu_loc_r = 0.80524e-3
+!cu_loc_z = 1.21371e-3
+
+!monel_loc_r = 1.031e-3
+!monel_loc_z = 1.5548e-3
+
+
+mgb2_loc_r = 0.3993e-3
+mgb2_loc_z = 0.60186e-3
+
+nb_loc_r = 0.60995e-3
+nb_loc_z = 0.91936-3
+
+cu_loc_r = 0.90470e-3
+cu_loc_z = 1.36363e-3
+
+
+monel_loc_r = 1.031e-3
+monel_loc_z = 1.554e-3
+angle = 180 !60
+number_of_planes = 150 !51
+
+
+a2 = monel_loc_r/2
+a3 = monel_loc_z/2
+a1 = 30
+
+!r_i = 0.4978416045
+!del_z = 0.0002605
+!del_r = 0.000159
+
+tot_wire_z = 1.8145E-03
+tot_wire_r = 1.1900E-03
+
+r_i = 0.4805165842
+del_z = tot_wire_z-monel_loc_z
+del_r = tot_wire_r-monel_loc_r
+
+
+wire_width_epoxy = monel_loc_r+del_r
+wire_height_epoxy = monel_loc_z+del_z
+
+
+
+layer = 35 !35
+loop = 27 !54
+!layer = 20 !20
+!loop = 25 !25
+
+mgb2_x_1 = r_i+del_r+(monel_loc_r)/2-(mgb2_loc_r)/2
+mgb2_y_1 = del_z+(monel_loc_z)/2-(mgb2_loc_z)/2
+mgb2_x_2 = mgb2_x_1+mgb2_loc_r
+mgb2_y_2 = del_z+(monel_loc_z)/2-(mgb2_loc_z)/2+mgb2_loc_z
+
+monel_x_1 = mgb2_x_1-(monel_loc_r-mgb2_loc_r)/2
+monel_y_1 = mgb2_y_1-(monel_loc_z-mgb2_loc_z)/2
+monel_x_2 = mgb2_x_2+(monel_loc_r-mgb2_loc_r)/2
+monel_y_2 = mgb2_y_2+(monel_loc_z-mgb2_loc_z)/2
+
+epoxy_x_1 = monel_x_1-del_r/2
+epoxy_x_2 = monel_x_1
+epoxy_x_3 = monel_x_2
+epoxy_x_4 = monel_x_2+del_r/2
+epoxy_y_1 = monel_y_1-del_z/2
+epoxy_y_2 = monel_y_1
+epoxy_y_3 = monel_y_2
+epoxy_y_4 = monel_y_2+del_z/2
+
+
+
+/PREP7          	! Pre-processor module
+
+/NERR,,99999999,,0,3
+
+ET,1,182 
+ET,2,SOLID185   	! Choose SOLID90 element type  
+
+MP, EX, 1, 150e9	! MgB2
+MP, PRXY, 1, 0.4
+
+MP, EX, 2, 150e9	! Homogenized Nb, Cu, Monel
+MP, PRXY, 2, 0.4
+
+MP, EX, 3, 150e9	! Epoxy
+MP, PRXY, 3, 0.4
+
+
+
+
+K,1,mgb2_x_1,mgb2_y_1
+K,2,mgb2_x_2,mgb2_y_1
+K,3,mgb2_x_2,mgb2_y_2
+K,4,mgb2_x_1,mgb2_y_2
+
+K,5,monel_x_1,monel_y_1
+K,6,monel_x_2,monel_y_1
+K,7,monel_x_2,monel_y_2
+K,8,monel_x_1,monel_y_2
+
+K,9,epoxy_x_1,epoxy_y_1
+K,10,epoxy_x_2,epoxy_y_1
+K,11,epoxy_x_3,epoxy_y_1
+K,12,epoxy_x_4,epoxy_y_1
+K,13,epoxy_x_1,epoxy_y_2
+
+K,14,epoxy_x_4,epoxy_y_2
+K,15,epoxy_x_1,epoxy_y_3
+
+K,16,epoxy_x_4,epoxy_y_3
+K,17,epoxy_x_1,epoxy_y_4
+K,18,epoxy_x_2,epoxy_y_4
+K,19,epoxy_x_3,epoxy_y_4
+K,20,epoxy_x_4,epoxy_y_4
+
+
+A,1,2,3,4
+
+A,1,2,6,5
+A,2,3,7,6
+A,3,4,8,7
+A,1,5,8,4
+
+A,13,5,10,9
+A,10,5,6,11
+A,6,11,12,14
+A,6,14,16,7
+A,7,16,20,19
+A,7,19,18,8
+A,8,18,17,15
+A,8,15,13,5
+
+
+ASEL, ALL
+APLOT
+
+numcmp, all
+
+
+ASEL, S, AREA,,1
+AATT, 1
+
+ASEL, S, AREA,,2,5
+AATT, 2
+
+ASEL, S, AREA,,6,13
+AATT, 3
+
+ALLSEL, ALL
+
+AESIZE, ALL, 1
+
+amesh,all
+
+*GET,max_k,KP,0,num,max
+
+K, max_k+1, 0,0,0
+K, max_k+2, 0,a3,0
+
+asel, all
+
+*GET, time1, Active,,TIME, WALL
+
+
+TYPE,1
+EXTOPT,ATTR,1,1,1   
+EXTOPT,ESIZE,1,1
+EXTOPT,ATTR,1
+EXTOPT,ACLEAR,1   
+VROTAT,ALL,,,,,,max_k+1,max_k+2,angle/(number_of_planes),1	
+ 
+CM,V_1,VOLU
+
+
+ALLSEL
+
+CMSEL,S,V_1 
+NSLV,S,1
+ESLV,S,1
+
+*GET,max_node,node,0,num,max
+
+csys,5
+NGEN,layer,max_node,ALL, , ,wire_width_epoxy, , ,1,
+EGEN,layer,max_node,ALL,
+
+
+*GET,max_node,node,0,num,max
+
+csys,5
+NGEN,loop,max_node,ALL,,,,,wire_height_epoxy,1,
+EGEN,loop,max_node,ALL,
+
+allsel, all
+
+*GET,max_node,node,0,num,max
+
+!lower extreme epoxy layer (extra)
+nsel, s, loc, z, 0, del_z
+
+
+!!!!!Solve this problem (solved!!!!)
+csys,5
+NGEN,2,max_node,ALL,,,,,-del_z/2,1,
+esel, s, cent, z, 0, del_z
+EGEN,2,max_node,ALL,
+
+
+
+!inner radius extreme epoxy layer (extra)
+nsel, all
+*GET,max_node,node,0,num,max
+
+
+nsel, s, loc, x, 0, r_i+del_r+tol
+NGEN,2,max_node,ALL,,,-del_r/2,,,1,
+esel, s, cent, x, 0, r_i+del_r+tol
+EGEN,2,max_node,ALL,
+
+
+!outer radius extreme epoxy layer (extra)
+nsel, all
+*GET,max_node,node,0,num,max
+
+value_1 = r_i+wire_width_epoxy*layer
+value_2 = r_i+wire_width_epoxy*layer+del_r/2
+
+nsel, s, loc, x, value_1-tol,value_2+tol
+NGEN,2,max_node,ALL,,,del_r/2,,,1,
+esel, s, cent, x, value_1, value_2
+EGEN,2,max_node,ALL,
+
+allsel, all
+*GET,max_node,node,0,num,max
+
+nummrg, node, tol
+
+allsel, all
+ngen, number_of_planes, max_node,ALL, , ,,angle/number_of_planes, ,1,
+egen, number_of_planes, max_node,ALL
+
+nummrg, node, 1e-6
+NUMCMP,NODE
+
+
+
+*GET, time2, Active,,TIME, WALL
+total_time=(time2-time1)*60
+
+save
+
