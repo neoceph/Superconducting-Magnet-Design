@@ -1,0 +1,377 @@
+! Contact Abdullah for any issues nirjhor18@gmail.com
+
+FINISH
+/clear, nostart
+
+!CHANGE DIRECTORY 
+!/MKDIR, Test1
+
+/CWD, F:\Abdullah\Writing\Article\Journal002\1542_3.0T\Geometry\Ansys
+
+/NOPR
+
+RESUME, Bundle1ReviewPaper,db
+
+/cwd, F:\Abdullah\Writing\Article\Journal002\1542_3.0T_Mn\ANSYS
+
+
+/DIRECTORY,,EMSTRESS,,
+/filename, Quench_Stress, 1
+/com, STRESS MODELING of Quench
+/prep7
+
+et,2, solid185
+
+/title, STRESS MODELING of quench
+
+/CWD, F:\Abdullah\Writing\Article\Journal002\1542_3.0T_Mn\ANSYS
+
+
+*get, z_max, node, 0, mxloc, z,
+
+tol_x = 1e-5
+tol_y = 1.2/3
+tol_z = 1e-5
+
+CSYS, 5
+
+*get, r_in, node, 0, mnloc, x,
+
+
+/CWD, F:\Abdullah\Writing\Article\Journal002\1542_3.0T_Mn\data
+
+var_name_array = 't_1'
+
+
+no_column = 2
+to_skip=0       ! enter number of lines to skip--NONE in this example
+no_plane=1	! determine number of planes required
+final_time = no_plane
+r=1
+j=1
+var_name = 't_%j%'
+
+
+/INQUIRE,numlines,LINES,var_name,csv
+to_read_mgb2=numlines-to_skip
+
+*DIM, array_%var_name_array%, ARRAY, to_read_mgb2,no_column, no_plane
+
+*DO, j, 1, no_plane
+	var_name = 't_%j%'
+
+
+	*DEL,table_%var_name%,,NOPR
+	! Number of rows reduced by one:
+	*DIM,table_%var_name%,TABLE,to_read_mgb2,no_column-1             ! table array to hold data
+	*TREAD,table_%var_name%,var_name,csv,,to_skip
+
+
+	*DO, i,1,no_column
+		*vfun,array_%var_name_array%(1,i,j),copy,table_%var_name%(1,i-1)
+	*ENDDO
+
+	*DEL,table_%var_name%,,NOPR
+
+
+*ENDDO
+
+/CWD, E:\Abdullah\Quench\Material_Property
+
+/prep7
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!MATERIAL 1 IS MgB2!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!Reading the E Value!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+MP, EX, 1, 273E9	
+MP, PRXY, 1, 0.181
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!Reading the THSX Value!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+no_column = 2
+to_skip=0       ! enter number of lines to skip--NONE in this example
+no_plane=1	! determine number of planes required
+r=1
+j=1
+/INQUIRE,numlines,LINES,TEC_mgb2,csv
+to_read=numlines-to_skip
+!
+*DEL,mgb2_tec,,NOPR
+! Number of rows reduced by one:
+*DIM,mgb2_tec,TABLE,to_read,no_column-1             ! table array to hold data
+*TREAD,mgb2_tec,TEC_mgb2,csv,,to_skip
+
+*DIM, mgb2_tec_array, ARRAY, to_read,no_column
+
+*DO, i,1,no_column
+	*vfun,mgb2_tec_array(1,i),copy,mgb2_tec(1,i-1)
+*ENDDO
+
+MPTEMP,,,,,,,,
+*DO, i,1,to_read
+	MPTEMP, i,mgb2_tec_array(i,1)
+	MPDATA, THSX, 1,i,mgb2_tec_array(i,2)
+*ENDDO
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!MATERIAL 2 IS homogenized COPPER!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!READING THE PROPERTY INPUT DATA FILE
+
+
+var_name = 'n_h_1542_nb_mn_cu'
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!Reading the E Value!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+no_column = 11
+to_skip=0       ! enter number of lines to skip--NONE in this example
+no_plane=1	! determine number of planes required
+r=1
+j=1
+/INQUIRE,numlines,LINES,var_name,csv
+to_read=numlines-to_skip
+!
+*DEL,table_%var_name%,,NOPR
+! Number of rows reduced by one:
+*DIM,table_%var_name%,TABLE,to_read-1,no_column-1             ! table array to hold data
+*TREAD,table_%var_name%,var_name,csv,,to_skip
+
+*DIM, array_%var_name%, ARRAY, to_read-1,no_column
+
+*DO, i,1,no_column
+	*vfun,array_%var_name%(1,i),copy,table_%var_name%(1,i-1)
+*ENDDO
+
+MPTEMP,,,,,,,,
+*DO, i,1,to_read-1
+	MPTEMP, i,array_%var_name%(i,1)
+	MPDATA, EZ, 2,i,array_%var_name%(i,2)
+	MPDATA, EX, 2,i,array_%var_name%(i,3)
+	MPDATA, EY, 2,i,array_%var_name%(i,4)
+	MPDATA, NUXY, 2,i,array_%var_name%(i,5)
+	MPDATA, NUXZ, 2,i,array_%var_name%(i,6)
+	MPDATA, NUYZ, 2,i,array_%var_name%(i,7)
+	MPDATA, GXY, 2,i,array_%var_name%(i,8)
+	MPDATA, GYZ, 2,i,array_%var_name%(i,9)
+	MPDATA, GXZ, 2,i,array_%var_name%(i,10)
+	MPDATA, THSX, 2,i,array_%var_name%(i,11)
+*ENDDO
+
+
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!MATERIAL 3 IS Insulator!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!Reading the E Value!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+no_column = 2
+to_skip=0       ! enter number of lines to skip--NONE in this example
+no_plane=1	! determine number of planes required
+r=1
+j=1
+/INQUIRE,numlines,LINES,E_ctd,csv
+to_read=numlines-to_skip
+!
+*DEL,ctd_E,,NOPR
+! Number of rows reduced by one:
+*DIM,ctd_E,TABLE,to_read,no_column-1             ! table array to hold data
+*TREAD,ctd_E,E_ctd,csv,,to_skip
+
+*DIM, ctd_E_array, ARRAY, to_read,no_column
+
+*DO, i,1,no_column
+	*vfun,ctd_E_array(1,i),copy,ctd_E(1,i-1)
+*ENDDO
+
+MPTEMP,,,,,,,,
+*DO, i,1,to_read
+	MPTEMP, i,ctd_E_array(i,1)
+	MPDATA, EX, 3,i,ctd_E_array(i,2)
+	MPDATA, PRXY,3,i,0.3
+*ENDDO
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!Reading the ALPX Value!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+no_column = 2
+to_skip=0       ! enter number of lines to skip--NONE in this example
+no_plane=1	! determine number of planes required
+r=1
+j=1
+/INQUIRE,numlines,LINES,TEC_ctd,csv
+to_read=numlines-to_skip
+!
+*DEL,ctd_tec,,NOPR
+! Number of rows reduced by one:
+*DIM,ctd_tec,TABLE,to_read,no_column-1             ! table array to hold data
+*TREAD,ctd_tec,TEC_ctd,csv,,to_skip
+
+*DIM, ctd_tec_array, ARRAY, to_read,no_column
+
+*DO, i,1,no_column
+	*vfun,ctd_tec_array(1,i),copy,ctd_tec(1,i-1)
+*ENDDO
+
+MPTEMP,,,,,,,,
+*DO, i,1,to_read
+	MPTEMP, i,ctd_tec_array(i,1)
+	MPDATA, ALPX, 3,i,ctd_tec_array(i,2)
+	MPDATA, ALPZ, 3,i,ctd_tec_array(i,2)
+*ENDDO
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!Reading the ALPX Value warp!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+no_column = 2
+to_skip=0       ! enter number of lines to skip--NONE in this example
+no_plane=1	! determine number of planes required
+r=1
+j=1
+/INQUIRE,numlines,LINES,TEC_ctd_warp,csv
+to_read=numlines-to_skip
+!
+*DEL,ctd_tec_warp,,NOPR
+! Number of rows reduced by one:
+*DIM,ctd_tec_warp,TABLE,to_read,no_column-1             ! table array to hold data
+*TREAD,ctd_tec_warp,TEC_ctd_warp,csv,,to_skip
+
+*DIM, ctd_tec_warp_array, ARRAY, to_read,no_column
+
+*DO, i,1,no_column
+	*vfun,ctd_tec_warp_array(1,i),copy,ctd_tec_warp(1,i-1)
+*ENDDO
+
+MPTEMP,,,,,,,,
+*DO, i,1,to_read
+	MPTEMP, i,ctd_tec_warp_array(i,1)
+	MPDATA, ALPY, 3,i,ctd_tec_warp_array(i,2)
+*ENDDO
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!End reading mat Values!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+FINISH
+
+
+/CWD, F:\Abdullah\Writing\Article\Journal002\1542_3.0T_Mn\ANSYS
+
+
+
+/Prep7
+
+!Specifying the initial condition
+
+NSEL, ALL
+TREF,10
+
+
+
+CSYS, 5
+!DSYS, 1
+
+NSEL, ALL
+NPLOT
+
+/SOLU
+
+NROPT, FULL
+
+NSEL, ALL
+DDELE, ALL, UX
+DDELE, ALL, UY
+DDELE, ALL, UZ
+
+! This is to read the maximum location of node in Z-direction
+
+
+
+!Fixing the inner radial locations
+
+	NSEL,S,LOC,X,r_in-tol_x,r_in+tol_x
+!	NPLOT
+	D, ALL, UX, 0	!fixing it only in radial direction
+	D, ALL, UY, 0
+	D, ALL, UZ, 0
+
+!Assigining the symmetry conditions
+	NSEL, S, LOC, Y, 0-tol_y, 0+tol_y
+	D, ALL, UZ, 0
+
+	NSEL, S, LOC, Y, 180-tol_y, 180+tol_y
+	D, ALL, UZ, 0
+
+	NSEL, S, LOC, Z, z_max-tol_z, z_max+tol_z
+	D, ALL, UY, 0
+
+/NERR,,99999999,,0,3
+
+
+*GET, time1, Active,,TIME, WALL
+
+*DO, j,1,final_time
+
+Time, j
+
+Allsel, all
+	
+
+	
+	*DO, i, 1, to_read_mgb2
+
+
+		temperature = array_%var_name_array%(i,2,j)
+		
+		nodes_no = array_%var_name_array%(i,1,j)
+
+		BF,nodes_no,TEMP,temperature
+	*ENDDO
+
+*GET, time2_%j%, Active,,TIME, WALL
+
+
+
+	ALLSEL, ALL
+	SAVE
+
+*GET, time3_%j%, Active,,TIME, WALL
+	
+	SOLVE
+
+*GET, time4_%j%, Active,,TIME, WALL
+
+*ENDDO
+
+time_assign = time2_%j%-time1
+time_solve = time3_%j%-time2
+total_time = time_assign+time_solve
+
+save
