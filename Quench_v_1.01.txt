@@ -1,0 +1,386 @@
+FINISH
+/clear, nostart
+
+/nopr
+
+*GET, start_time, ACTIVE, 0, TIME, WALL
+
+*dim, directory, string, 200, 3
+
+directory(1,1) = 'F:\Abdullah\Writing\Articles\Journal005\March_2016\Quench\Resistive\ansys'
+directory(1,2) = 'F:\Abdullah\Writing\Articles\Journal005\March_2016\material_properties'
+directory(1,3) = 'F:\Abdullah\Writing\Articles\Journal005\March_2016\supplimental_data'
+
+
+/CWD, %directory(1,1)%
+SAVE
+
+/Filename, 3D_quench, 1
+
+/PREP7
+/TITLE, Wire Heating Stress, CENTERLINE TEMP. OF AN ELECTRICAL WIRE
+
+ET, 1, Plane 223
+KEYOPT, 1, 1, 111
+ET, 2, Solid 90
+!KEYOPT, 2, 1, 111	! This is structural-thermoelectric
+
+!KEYOPT, 2, 1, 11 	! this is for structural-thermal
+
+
+!/INPUT,'elasticity','txt',%directory(1,2)%,, 0     		
+!/INPUT,'thermal_expansion_coefficient','txt',%directory(1,2)%,, 0
+/INPUT,'heat_capacity','txt',%directory(1,2)%,, 0
+/INPUT,'resistivity','txt',%directory(1,2)%,, 0
+/INPUT,'thermal_conductivity','txt',%directory(1,2)%,, 0
+
+
+MP, DENS, 1, 6190.49
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!Reading Magnetic field table!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+/CWD, %directory(1,3)%
+
+/INPUT,'b_calc',txt,%directory(1,3)%,,0
+/INPUT,'Ic',txt,%directory(1,3)%,,0
+
+/CWD, %directory(1,1)%
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!Constants!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+pi = 3.14159265358979323846
+total_volume = 0
+tol = 1e-6
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!Geometry Details!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+r_in = 0.500058
+r_out = 0.532188
+wire_z = 1.8145e-3
+wire_r = 1.19e-3
+z_low = 0
+z_high = 0.11677
+disturb_height = 0.2e-2
+disturb_length = 1.6e-2
+disturb_length_in_degree = (disturb_length/r_out)*(180/pi)
+angle = 10
+no_of_segment = 20
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!Electrical Properties!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+current = 255.872
+R_avg = 0
+L_tot = 89.8
+current_density = current/(wire_z*wire_r)
+E_c = 1e-4
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!Quench Properties!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+q_total = 3
+q_area = disturb_height*disturb_length
+q_excite = q_total/q_area
+ref_temp = 10
+n_value = 30
+dump_time = 0.5
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!Temporal Constants!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+no_step = 2
+n_div = 20
+t_step = 1e-3
+min_step = 1e-3
+max_step = 1e-3
+init_time = 1e-3
+final_time = 1
+total_time_step = final_time/min_step
+time_current_dim = total_time_step+2
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!Array Initialization!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+*dim, time_current, array, time_current_dim, 1
+*dim, store_R, array, time_current_dim, 1
+
+key_one = 1
+key_two = 2
+K,key_one,0,0,0
+K,key_two,0,0.1,0
+
+BLC4, r_in,z_low,r_out-r_in,(z_high-z_low)/2
+
+
+LSEL, S, LOC, X, r_out
+LESIZE, ALL,,,n_div,n_div/2,,,1
+LSEL, S, LOC, X, r_in
+LESIZE, ALL,,,n_div,1/(n_div/2),,,1
+
+LSEL, S, LOC, Y, z_high/2
+LESIZE, ALL,,,n_div,n_div/2,,,1
+LSEL, S, LOC, Y, z_low
+LESIZE, ALL,,,n_div,1/(n_div/2),,,1
+
+ASEL, ALL
+AMESH, ALL
+!AREFINE, ALL,,,3
+!AREFINE, ALL,,,3
+
+
+TYPE,1
+EXTOPT,ATTR,1,1,1   
+EXTOPT,ESIZE,1,1
+EXTOPT,ACLEAR,1   
+VROTAT, ALL,,,,,,key_one,key_two,angle/no_of_segment,1
+
+csys,5
+
+allsel, all
+*GET,max_node,node,0,num,max
+
+ngen, no_of_segment, max_node,ALL, , ,,(angle/no_of_segment), ,1,
+egen, no_of_segment, max_node,ALL
+
+nummrg, node, tol
+numcmp, node
+
+!!! End of bundle generation
+
+CSYS, 5
+
+*GET,max_elem,elem,0,num,max
+
+*dim, q_gen, array, max_elem, 1
+*dim, B_loc, array, max_elem, 2
+*dim, elem_volu, array, max_elem, 1
+
+
+
+*DO, j, 1, max_elem
+	*get, B_loc(j,1),elem,j,cent,x
+	*get, B_loc(j,2),elem,j,cent,z
+	*get, elem_volu(j,1),elem,j, volu
+	total_volume = total_volume+elem_volu(j,1)
+*ENDDO
+
+NSEL, S, LOC, X, r_out-tol, r_out+tol
+NSEL, R, LOC, Y, 0, disturb_length_in_degree
+NSEL, R, LOC, Z, 0, disturb_height
+ESLN
+NSLE, ALL
+NSEL, R, LOC, X, r_out-tol, r_out+tol
+CM, dump_node, NODE
+
+ALLSEL, ALL
+
+ETDELE, 1
+/solu
+
+NLGEOM, ON
+
+rescontrol,define,all,1
+
+CSYS, 5
+
+ALLSEL, ALL
+
+TREF, ref_temp
+!TUNIF, 10
+
+ANTYPE, TRANS
+AUTOTS, OFF
+OUTRES, , ALL
+KBC, 0
+!DELTIM,min_step,min_step,min_step	!DELTIM, time_step_for_now, minimum, maximum
+NSUBST, no_step, no_step, no_step, ON
+TIME, init_time
+
+
+!!!!!!!!!!!!!!!!!!!!!!
+! Applying electrical, structural and heat boundary conditions
+!!!!!!!!!!!!!!!!!!!!!!
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!Electrical Boundary!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!NSEL, S, loc, y, 0
+!D, ALL, VOLT, 0
+
+!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!Structural boundary!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!NSEL, S, loc, x, r_in
+!D, ALL, UX, 0
+!D, ALL, UY, 0
+
+!NSEL, S, Loc, z, 0
+!D, ALL, UZ, 0
+
+!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!Heat transfer!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!
+
+NSEL, S, loc, x, r_out
+!SF, ALL, CONV, 5, 10
+
+SF, ALL, HFLUX, 0
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!Electrical Force current!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!NSEL, S, LOC, y, angle
+!CP, 1, VOLT, ALL
+
+
+! Selecting the mid point node. This is required for the weird behavior of current force behavior.
+
+!NSEL, S, LOC, Y, ANGLE
+!nsel, r, loc, z, z_high/4-tol, z_high/2+tol
+!nsel, r, loc, x, (R_in+R_out)/2+tol, R_out-tol
+!*GET, value, NODE,0, MNLOC, X
+!nsel, r, loc, x, value-tol, value+tol
+!*GET, value, NODE,0, MNLOC, Z
+!nsel, r, loc, z, value-tol, value+tol
+
+
+!F, ALL, AMPS, 10
+
+
+
+CONVTOL, F
+
+CMSEL, S, dump_node
+SF, ALL, HFLUX,q_excite
+
+*GET, restart_time, ACTIVE, 0, TIME, WALL
+
+ALLSEL, ALL
+SOLVE
+FINISH
+
+
+
+! Restart playing.
+!parsave, all, time_step
+
+time_current(1) = current
+
+*DO, i, 1, total_time_step
+
+time_current(i+1)= time_current(i)-t_step*(R_avg/L_tot)
+new_current = time_current(i)
+current_density = new_current/(wire_z*wire_r)
+
+!!!!!!!!!!!!!!!!!
+!!!!Q_gen!!!!!!!!
+!!!!!!!!!!!!!!!!!
+
+/post1
+set,,,,,,,i
+ETABLE,,TEMP
+
+R_avg = 0
+
+*DO, j, 1, max_elem
+	*get, e_temp, etab, 1, elem, j
+	resistivity = table_resistivity(e_temp)
+	check_volt = resistivity*current_density
+
+	B_elem = table_B_Bundle_5(B_loc(j,1), B_loc(j,2))
+	critical_current = table_IC(e_temp,B_elem*(new_current/current))
+	
+	*IF, critical_current, GT, 0, then
+		current_ratio = E_c*((new_current/critical_current)**n_value)
+		
+		*IF, current_ratio, GE, check_volt, then
+			q_gen(j,1) = resistivity*(current_density**2)
+		*ELSE	
+			q_gen(j,1) = current_density*current_ratio
+		*endif
+	*ELSE
+		q_gen(j,1) = resistivity*(current_density**2)
+	*ENDIF	
+	
+	R_avg = R_avg+resistivity*elem_volu(j,1)
+
+*ENDDO
+
+R_avg = (R_avg*((r_in+r_out)/2)*((angle*pi)/180))/((z_high/2)*(r_out-r_in)*total_volume)
+store_R(i,1)=R_avg
+/solu
+*DO, j, 1, max_elem
+	BFE, j, HGEN,,q_gen(j,1)*elem_volu(j,1)
+*ENDDO
+
+parsave, all, time_step
+
+/SOLU
+ANTYPE,,rest,i,1,endstep
+ALLSEL, ALL
+solve
+
+parresu,,time_step
+
+*get,current_time,active,0,set,time
+
+
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!Heat flux input!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+*if, current_time,LE,dump_time-min_step, then
+
+	CMsel, s, dump_node, NODE
+	SF, ALL, HFLUX,q_excite
+	
+*ELSE
+	CMSEL, S, dump_node, node
+	SF, ALL, HFLUX, 0
+*ENDIF
+
+
+t_step = t_step+min_step
+time, t_step+min_step
+NSUBST,no_step,no_step,no_step,
+KBC, 0
+
+!deltim, min_step,min_step,min_step 
+
+parsave, all, time_step
+
+ALLSEL, ALL
+solve
+
+FINISH
+
+*ENDDO
+
+*GET, end_time, ACTIVE, 0, TIME, WALL
+
+total_time = (end_time-restart_time)
