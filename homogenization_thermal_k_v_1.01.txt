@@ -1,0 +1,220 @@
+finish
+/clear
+/com, Thermal properties
+/title, Homogenization Of Composite
+/filename, Homogenization_Composite_Thermal, 1
+*GET,TT1,ACTIVE,0,TIME,WALL 
+/CWD, 'F:\Abdullah\Writing\Articles\Journal004\wire_modeling\thermal_conductivity\ansys'
+CDOPT,IGES  
+
+/CWD, F:\Abdullah\Writing\Articles\Journal004\Wire_geom
+
+CDREAD,SOLID,'','',,'wire_1_epoxy_assembly_asm_surface','igs'
+
+/prep7
+ASEL, ALL
+ASEL, U, LOC,Z,0
+ADELE,ALL,,,1 
+FINISH
+
+/CWD, 'F:\Abdullah\Writing\Articles\Journal004\wire_modeling\thermal_conductivity\ansys'
+
+!rf=3.5		! Radius fiber in microns
+a2 = 0.905/1000	! x2 length in microns
+a3=0.595/1000	! x3 length in microns
+a1 = 0.05/1000		! x1 length in microns
+
+tol = 1e-3
+
+temp_points = 30
+
+/PREP7          	! Pre-processor module  
+
+ASEL, ALL
+APLOT
+ARSCALE,ALL, , ,1/1000,1/1000,1/1000, ,1,1 
+ASEL, ALL
+APLOT
+
+
+/CWD, F:\Abdullah\Writing\Articles\Journal004\material_properties
+
+/prep7
+
+/INPUT,'MgB2_k','txt','F:\Abdullah\Writing\Articles\Journal004\material_properties',, 0
+
+/INPUT,'niobium_k','txt','F:\Abdullah\Writing\Articles\Journal004\material_properties',, 0
+
+/INPUT,'copper_k','txt','F:\Abdullah\Writing\Articles\Journal004\material_properties',, 0
+
+/INPUT,'monel_k','txt','F:\Abdullah\Writing\Articles\Journal004\material_properties',, 0
+
+/INPUT,'CTD_k','txt','F:\Abdullah\Writing\Articles\Journal004\material_properties',, 0
+
+
+/CWD, 'F:\Abdullah\Writing\Articles\Journal004\wire_modeling\thermal_conductivity\ansys'
+
+
+
+ET,1,77 
+ET,2,SOLID90   	! Choose SOLID90 element type  
+
+
+numcmp, all
+
+
+ASEL, S, AREA,,2,7
+AATT, 1
+
+ASEL, S, AREA,,8,13
+AATT, 2
+
+ASEL, S, AREA,,15
+AATT, 3
+
+ASEL, S, AREA,,14
+AATT, 4
+
+ASEL, S, AREA,,1
+AATT, 5
+
+ALLSEL, ALL
+
+ALLSEL, ALL
+
+!ARSYM,X,ALL
+!ARSYM,Y,ALL
+!NUMMRG,ALL, , , ,LOW
+esize,0.01/1000
+amesh,all
+
+!asel, all
+!arefine, all,,,1
+
+*GET,max_k,KP,0,num,max
+
+KSEL, S, Loc, X, 0
+KSEL, R, LOC, Y, 0
+KSEL, R, LOC, Z, 0
+
+*GET,min_k,KP,0,num,max
+
+K,max_k+1,,,a1
+L,max_k+1, min_k
+LESIZE,1,1
+
+*GET,max_ln,LINE,0,num,max
+
+TYPE,   2   
+EXTOPT,ATTR,1
+EXTOPT,ACLEAR,1   
+VDRAG,ALL, , , , , ,max_ln	! Number of divisions on the matrix
+
+
+
+*create,srecover	! create macro to calculate average heat flux
+/POST1              ! Post-processor module
+/nopr
+ETABLE, ,VOLU,              ! Get element volume
+ETABLE, ,TF,X                ! Get element stress
+ETABLE, ,TF,Y
+ETABLE, ,TF,Z
+SMULT,TFXV,VOLU,TFX,1,1,
+SMULT,TFYV,VOLU,TFY,1,1,      ! Stress by element volume
+SMULT,TFZV,VOLU,TFZ,1,1,
+SSUM
+*get,totvol,ssum,,item,volu ! Integer stress along total volume
+*get,totsx ,ssum,,item,TFXV
+*get,totsy ,ssum,,item,TFYV
+*get,totsz ,ssum,,item,TFZV
+
+
+Sxx0 = (totsx*a2)/totvol     ! Compute average RVE stress
+Syy0 = (totsy*a3)/totvol
+Szz0 = (totsz*a1)/totvol
+/gopr
+*END
+
+*dim, k, ARRAY, temp_points,3
+
+
+*Do, i, 1, temp_points
+
+/SOLU                   ! Solution module
+TREF, 10*i
+T1=10*i
+T2=T1+1
+lsclear,all		! Boundary conditions Column 1
+Asel,s,loc,x,0 		! Model X direction = 2 material direction 
+Asel,a,loc,x,a2+tol
+SFA,all,1,HFLUX,0,
+Asel,s,loc,y,0 		! Model Y direction = 3 material direction 
+Asel,a,loc,y,a3
+SFA,all,1,HFLUX,0,
+Asel,s,loc,z,0 		! Model Z direction = 1 material direction
+DA,all,TEMP,T1
+Asel,s,loc,z,a1
+da,all,TEMP,T2
+allsel,all
+lswrite,1
+
+lsclear,all		! Boundary conditions Column 2
+asel,s,loc,x,0  	! Model X direction = 2 material direction 
+DA,all,TEMP,T1
+asel,s,loc,x,a2
+da,all,TEMP,T2
+asel,s,loc,y,0 		! Model Y direction = 3 material direction 
+asel,a,loc,y,a3
+SFA,all,1,HFLUX,0,
+asel,s,loc,z,0 		! Model Z direction = 1 material direction
+asel,a,loc,z,a1
+SFA,all,1,HFLUX,0,
+asel,all
+lswrite,2
+
+lsclear,all		! Boundary conditions Column 3
+asel,s,loc,x,0  	! Model X direction = 2 material direction 
+asel,a,loc,x,a2
+SFA,all,1,HFLUX,0,
+asel,s,loc,y,0 		! Model Y direction = 3 material direction  
+DA,all,TEMP,T1
+asel,s,loc,y,a3
+da,all,TEMP,T2
+asel,s,loc,z,0 		! Model Z direction = 1 material direction
+asel,a,loc,z,a1
+SFA,all,1,HFLUX,0,
+asel,all
+lswrite,3
+
+LSSOLVE,1,3		! Solve all load sets
+FINISH                  ! Exit solution module
+
+
+/POST1              ! Post-processor module
+
+
+SET,1               ! First column coefficients
+*use, srecover
+K(i,1) = -Szz0
+
+SET,2               ! Second column coefficients
+*use,srecover
+K(i,2) = -Sxx0
+
+SET,3               ! Third column coefficients
+*use,srecover
+K(i,3) = -Syy0
+
+*ENDDO
+
+
+*GET,TT2,ACTIVE,0,TIME,WALL
+Run_time=(TT2-TT1)*60
+
+*CREATE,ansuitmp
+*CFOPEN,'Kth_ISo','txt',' '  
+*VWRITE,k(1,1), k(1,2), k(1,3)
+(3e16.8) 
+*CFCLOSE 
+*END
+/INPUT,ansuitmp
