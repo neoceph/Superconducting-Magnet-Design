@@ -1,0 +1,1830 @@
+! Contact Abdullah for any issues nirjhor18@gmail.com
+
+FINISH
+/clear, nostart
+
+!CHANGE DIRECTORY 
+/MKDIR, Test1
+/CWD, D:\Abdullah\Writing\Articles\Journal001\ANSYS\Total\Review\temp
+/DIRECTORY,,EMSTRESS,,
+/filename, EMStress, 1
+/com, STRESS MODELING of Electromagnetic Charging
+/prep7
+/title, STRESS MODELING of Electromagnetic Charging
+
+
+ET,1,PLANE233,,,1	! Plane13, AZ DOF, AXISYMMETRIC, FOR AIR 
+
+ET,2,PLANE233,,,1	! Plane13, AZ,UX,UY,TEMP DOF, AXISYMMETRIC, FOR Steel and Coil material
+
+	
+
+MP, EX, 1, 1.19E+11	!MATERIAL 1 IS WIRE
+MP, EY, 1, 1.23E+11
+MP, EZ, 1, 1.53E+11
+MP, MURX, 1, 1
+MP, NUXY, 1, 0.332
+MP, NUYZ, 1, 0.284
+MP, NUXZ, 1, 0.291
+MP, GXY, 1, 3.61E+10
+MP, GYZ, 1, 4.39E+10
+MP, GXZ, 1, 4.09E+10
+MP, ALPX, 1, 1.07899E-05
+MP, ALPY, 1, 1.07899E-05
+MP, ALPZ, 1, 9.25988E-06
+
+
+
+MP, EX, 2, 190E9		!MATERIAL 2 IS Steel
+MP, MURX, 2, 1
+MP, NUXY, 2, 0.305
+MP, ALPX, 2, 1.2E-5
+MP, MURX,2,1  
+
+MP, MURX,3,1		! Material is air Relative permiability
+
+
+Mthick = 0.01
+
+
+EMUNIT,MKS               ! MKS UNITS
+
+!COIL Specification
+R1_i = 0.500058015
+R1_o = 0.532188015
+R2_i = 0.500572511
+R2_o = 0.532702511
+R3_i = 0.500001488
+R3_o = 0.53213
+R4_i = 0.5
+R4_o = 0.53213
+R5_i = 0.905863086
+R5_o = 0.930853086
+
+
+Z1_l = 0.0496339006784
+Z1_h = 0.116770401
+Z2_l = 0.227363742
+Z2_h = 0.318088742
+Z3_l = 0.463904874
+Z3_h = 0.576403874
+Z4_l = 0.659515695
+Z4_h = 0.869997695
+Z5_l = 0.61216759
+Z5_h = 0.80631909
+
+!Layer Number
+
+Bundle_1 = 27
+Bundle_2 = 27
+Bundle_3 = 27
+Bundle_4 = 27
+Bundle_5 = 21
+
+tol = 1E-6
+tagcp = 1
+
+
+!FORMATION OF AIR
+
+
+RECTNG, 1.1, 2, 0, 1.1
+RECTNG, 0, 0.3, 0, 1.1
+RECTNG, 2, 3, 0, 3
+RECTNG, 0, 2, 1.1, 3
+RECTNG, 0.3, 1.1, 0, 1.1
+ASEL, ALL
+AGLUE, ALL
+NUMCMP, AREA
+RECTNG, R1_i-MThick, R1_o, Z1_l, Z1_h
+ASBA,3,6
+ASEL, ALL
+AGLUE, ALL
+NUMCMP, ALL
+RECTNG, R2_i-MThick, R2_o, Z2_l, Z2_h
+ASBA,5,6
+AGLUE, ALL
+NUMCMP, ALL
+
+RECTNG, R3_i-MThick, R3_o, Z3_l, Z3_h
+ASBA,5,6
+AGLUE, ALL
+NUMCMP, ALL
+
+RECTNG, R4_i-MThick, R4_o, Z4_l, Z4_h
+ASBA,5,6
+NUMCMP, ALL
+
+RECTNG, R5_i-MThick, R5_o, Z5_l, Z5_h
+ASBA,5,6
+NUMCMP, ALL
+AGLUE, ALL
+NUMCMP, ALL
+
+
+!formation of COIL
+
+NUMSTR, AREA, 100
+
+RECTNG, R1_i-MThick,R1_i,Z1_l,Z1_h
+
+
+*DO, j,1,Bundle_1
+
+	RECTNG, R1_i+(j-1)*((R1_o-R1_i)/Bundle_1),R1_i+(j)*((R1_o-R1_i)/Bundle_1),Z1_l,(Z1_h-z1_L)/2+Z1_l
+	RECTNG, R1_i+(j-1)*((R1_o-R1_i)/Bundle_1),R1_i+(j)*((R1_o-R1_i)/Bundle_1),(Z1_h-z1_L)/2+Z1_l,z1_h	
+	!ASEL, S, AREA,,5+j,
+*ENDDO
+
+AGLUE, ALL
+NUMCMP, ALL
+
+NUMSTR, AREA, 200
+
+RECTNG, R2_i-MThick,R2_i,Z2_l,Z2_h
+
+*DO, j,1,Bundle_2
+
+	RECTNG, R2_i+(j-1)*((R2_o-R2_i)/Bundle_2),R2_i+(j)*((R2_o-R2_i)/Bundle_2),Z2_l,(Z2_h-z2_L)/2+Z2_l
+	RECTNG, R2_i+(j-1)*((R2_o-R2_i)/Bundle_2),R2_i+(j)*((R2_o-R2_i)/Bundle_2),(Z2_h-z2_L)/2+Z2_l,z2_h	
+*ENDDO
+
+NUMSTR, AREA, 300
+
+RECTNG, R3_i-MThick,R3_i,Z3_l,Z3_h
+
+*DO, j,1,Bundle_3
+
+	RECTNG, R3_i+(j-1)*((R3_o-R3_i)/Bundle_3),R3_i+(j)*((R3_o-R3_i)/Bundle_3),Z3_l,(Z3_h-z3_L)/2+Z3_l
+	RECTNG, R3_i+(j-1)*((R3_o-R3_i)/Bundle_3),R3_i+(j)*((R3_o-R3_i)/Bundle_3),(Z3_h-z3_L)/2+Z3_l,z3_h	
+*ENDDO
+
+NUMSTR, AREA, 400
+
+RECTNG, R4_i-MThick,R4_i,Z4_l,Z4_h
+
+*DO, j,1,Bundle_4
+
+	RECTNG, R4_i+(j-1)*((R4_o-R4_i)/Bundle_4),R4_i+(j)*((R4_o-R4_i)/Bundle_4),Z4_l,(Z4_h-z4_L)/2+Z4_l
+	RECTNG, R4_i+(j-1)*((R4_o-R4_i)/Bundle_4),R4_i+(j)*((R4_o-R4_i)/Bundle_4),(Z4_h-z4_L)/2+Z4_l,z4_h	
+*ENDDO
+
+NUMSTR, AREA, 500
+
+RECTNG, R5_i-MThick,R5_i,Z5_l,Z5_h
+
+*DO, j,1,Bundle_5
+
+	RECTNG, R5_i+(j-1)*((R5_o-R5_i)/Bundle_5),R5_i+(j)*((R5_o-R5_i)/Bundle_5),Z5_l,(Z5_h-z5_L)/2+Z5_l
+	RECTNG, R5_i+(j-1)*((R5_o-R5_i)/Bundle_5),R5_i+(j)*((R5_o-R5_i)/Bundle_5),(Z5_h-z5_L)/2+Z5_l,z5_h	
+*ENDDO
+
+
+ASEL, S, AREA,,100,599
+APLOT
+
+ASEL, ALL
+AGLUE, ALL
+
+NUMCMP, ALL
+
+
+!Selecting bundles macro
+
+*CREATE, BUNDLE, MAC
+
+ASEL, S, AREA,,5,6
+ASEL, A, AREA,,8,32	!Bundle 1 lower layers
+
+ASEL, A, AREA,,7,7	!Bundle 1 upper layers
+ASEL, A, AREA,,34,58
+ASEL, A, AREA,,33
+APLOT
+
+
+ASEL, A, AREA,,60,61	!Bundle 2 lower layers
+ASEL, A, AREA,,63,87
+
+ASEL, A, AREA,,62,62	!Bundle 2 upper layers
+ASEL, A, AREA,,170,194
+ASEL, A, AREA,,166
+
+
+ASEL, A, AREA,,88,89	!Bundle 3 lower layers
+ASEL, A, AREA,,91,115
+
+ASEL, A, AREA,,90,90	!Bundle 3 upper layers
+ASEL, A, AREA,,195,219
+ASEL, A, AREA,,167,167
+
+
+ASEL, A, AREA,,116,117	!Bundle 4 lower layers
+ASEL, A, AREA,,119,143
+
+ASEL, A, AREA,,118,118	!Bundle 4 upper layers
+ASEL, A, AREA,,220,244
+ASEL, A, AREA,,168,168
+
+ASEL, A, AREA,,144,145	!Bundle 5 lower layers
+ASEL, A, AREA,,147,165	
+
+ASEL, A, AREA,,146,146	!Bundle 5 upper layers
+ASEL, A, AREA,,245,263
+ASEL, A, AREA,,169,169	
+APLOT
+*END
+
+
+!Select layers and define as macros
+
+*CREATE, Bundle1layer1, MAC
+
+ASEL, S, AREA,,5
+ASEL, A, AREA,,7
+ESLA
+
+*END
+
+*CREATE, Bundle1layer2, MAC
+
+ASEL, S, AREA,,6
+ASEL, A, AREA,,34
+ESLA
+
+*END
+
+*CREATE, Bundle1layer3, MAC
+
+ASEL, S, AREA,,8
+ASEL, A, AREA,,35
+ESLA
+
+*END
+
+*CREATE, Bundle1layer4, MAC
+
+ASEL, S, AREA,,9
+ASEL, A, AREA,,36
+ESLA
+
+*END
+
+*CREATE, Bundle1layer5, MAC
+
+ASEL, S, AREA,,10
+ASEL, A, AREA,,37
+ESLA
+
+*END
+
+*CREATE, Bundle1layer6, MAC
+
+ASEL, S, AREA,,11
+ASEL, A, AREA,,38
+ESLA
+
+*END
+
+*CREATE, Bundle1layer7, MAC
+
+ASEL, S, AREA,,12
+ASEL, A, AREA,,39
+ESLA
+
+*END
+
+*CREATE, Bundle1layer8, MAC
+
+ASEL, S, AREA,,13
+ASEL, A, AREA,,40
+ESLA
+
+*END
+
+*CREATE, Bundle1layer9, MAC
+
+ASEL, S, AREA,,14
+ASEL, A, AREA,,41
+ESLA
+
+*END
+
+*CREATE, Bundle1layer10, MAC
+
+ASEL, S, AREA,,15
+ASEL, A, AREA,,42
+ESLA
+
+*END
+
+*CREATE, Bundle1layer11, MAC
+
+ASEL, S, AREA,,16
+ASEL, A, AREA,,43
+ESLA
+
+*END
+
+*CREATE, Bundle1layer12, MAC
+
+ASEL, S, AREA,,17
+ASEL, A, AREA,,44
+ESLA
+
+*END
+
+*CREATE, Bundle1layer13, MAC
+
+ASEL, S, AREA,,18
+ASEL, A, AREA,,45
+ESLA
+
+*END
+
+*CREATE, Bundle1layer14, MAC
+
+ASEL, S, AREA,,19
+ASEL, A, AREA,,46
+ESLA
+
+*END
+
+*CREATE, Bundle1layer15, MAC
+
+ASEL, S, AREA,,20
+ASEL, A, AREA,,47
+ESLA
+
+*END
+
+*CREATE, Bundle1layer16, MAC
+
+ASEL, S, AREA,,21
+ASEL, A, AREA,,48
+ESLA
+
+*END
+
+*CREATE, Bundle1layer17, MAC
+
+ASEL, S, AREA,,22
+ASEL, A, AREA,,49
+ESLA
+
+*END
+
+*CREATE, Bundle1layer18, MAC
+
+ASEL, S, AREA,,23
+ASEL, A, AREA,,50
+ESLA
+
+*END
+
+*CREATE, Bundle1layer19, MAC
+
+ASEL, S, AREA,,24
+ASEL, A, AREA,,51
+ESLA
+
+*END
+
+*CREATE, Bundle1layer20, MAC
+
+ASEL, S, AREA,,25
+ASEL, A, AREA,,52
+ESLA
+
+*END
+
+*CREATE, Bundle1layer21, MAC
+
+ASEL, S, AREA,,26
+ASEL, A, AREA,,53
+ESLA
+
+*END
+
+*CREATE, Bundle1layer22, MAC
+
+ASEL, S, AREA,,27
+ASEL, A, AREA,,54
+ESLA
+
+*END
+
+*CREATE, Bundle1layer23, MAC
+
+ASEL, S, AREA,,28
+ASEL, A, AREA,,55
+ESLA
+
+*END
+
+*CREATE, Bundle1layer24, MAC
+
+ASEL, S, AREA,,29
+ASEL, A, AREA,,56
+ESLA
+
+*END
+
+*CREATE, Bundle1layer25, MAC
+
+ASEL, S, AREA,,30
+ASEL, A, AREA,,57
+ESLA
+
+*END
+
+*CREATE, Bundle1layer26, MAC
+
+ASEL, S, AREA,,31
+ASEL, A, AREA,,58
+ESLA
+
+*END
+
+*CREATE, Bundle1layer27, MAC
+
+ASEL, S, AREA,,32
+ASEL, A, AREA,,33
+ESLA
+
+*END
+
+
+
+
+!Bundle 2
+
+*CREATE, Bundle2layer1, MAC
+
+ASEL, S, AREA,,60
+ASEL, A, AREA,,62
+ESLA
+
+*END
+
+*CREATE, Bundle2layer2, MAC
+
+ASEL, S, AREA,,61
+ASEL, A, AREA,,170
+ESLA
+
+*END
+
+*CREATE, Bundle2layer3, MAC
+
+ASEL, S, AREA,,63
+ASEL, A, AREA,,171
+ESLA
+
+*END
+
+*CREATE, Bundle2layer4, MAC
+
+ASEL, S, AREA,,64
+ASEL, A, AREA,,172
+ESLA
+
+*END
+
+*CREATE, Bundle2layer5, MAC
+
+ASEL, S, AREA,,65
+ASEL, A, AREA,,173
+ESLA
+
+*END
+
+*CREATE, Bundle2layer6, MAC
+
+ASEL, S, AREA,,66
+ASEL, A, AREA,,174
+ESLA
+
+*END
+
+*CREATE, Bundle2layer7, MAC
+
+ASEL, S, AREA,,67
+ASEL, A, AREA,,175
+ESLA
+
+*END
+
+*CREATE, Bundle2layer8, MAC
+
+ASEL, S, AREA,,68
+ASEL, A, AREA,,176
+ESLA
+
+*END
+
+*CREATE, Bundle2layer9, MAC
+
+ASEL, S, AREA,,69
+ASEL, A, AREA,,177
+ESLA
+
+*END
+
+*CREATE, Bundle2layer10, MAC
+
+ASEL, S, AREA,,70
+ASEL, A, AREA,,178
+ESLA
+
+*END
+
+*CREATE, Bundle2layer11, MAC
+
+ASEL, S, AREA,,71
+ASEL, A, AREA,,179
+ESLA
+
+*END
+
+*CREATE, Bundle2layer12, MAC
+
+ASEL, S, AREA,,72
+ASEL, A, AREA,,180
+ESLA
+
+*END
+
+*CREATE, Bundle2layer13, MAC
+
+ASEL, S, AREA,,73
+ASEL, A, AREA,,181
+ESLA
+
+*END
+
+*CREATE, Bundle2layer14, MAC
+
+ASEL, S, AREA,,74
+ASEL, A, AREA,,182
+ESLA
+
+*END
+
+*CREATE, Bundle2layer15, MAC
+
+ASEL, S, AREA,,75
+ASEL, A, AREA,,183
+ESLA
+
+*END
+
+*CREATE, Bundle2layer16, MAC
+
+ASEL, S, AREA,,76
+ASEL, A, AREA,,184
+ESLA
+
+*END
+
+*CREATE, Bundle2layer17, MAC
+
+ASEL, S, AREA,,77
+ASEL, A, AREA,,185
+ESLA
+
+*END
+
+*CREATE, Bundle2layer18, MAC
+
+ASEL, S, AREA,,78
+ASEL, A, AREA,,186
+ESLA
+
+*END
+
+*CREATE, Bundle2layer19, MAC
+
+ASEL, S, AREA,,79
+ASEL, A, AREA,,187
+ESLA
+
+*END
+
+*CREATE, Bundle2layer20, MAC
+
+ASEL, S, AREA,,80
+ASEL, A, AREA,,188
+ESLA
+
+*END
+
+*CREATE, Bundle2layer21, MAC
+
+ASEL, S, AREA,,81
+ASEL, A, AREA,,189
+ESLA
+
+*END
+
+*CREATE, Bundle2layer22, MAC
+
+ASEL, S, AREA,,82
+ASEL, A, AREA,,190
+ESLA
+
+*END
+
+*CREATE, Bundle2layer23, MAC
+
+ASEL, S, AREA,,83
+ASEL, A, AREA,,191
+ESLA
+
+*END
+
+*CREATE, Bundle2layer24, MAC
+
+ASEL, S, AREA,,84
+ASEL, A, AREA,,192
+ESLA
+
+*END
+
+*CREATE, Bundle2layer25, MAC
+
+ASEL, S, AREA,,85
+ASEL, A, AREA,,193
+ESLA
+
+*END
+
+*CREATE, Bundle2layer26, MAC
+
+ASEL, S, AREA,,86
+ASEL, A, AREA,,194
+ESLA
+
+*END
+
+*CREATE, Bundle2layer27, MAC
+
+ASEL, S, AREA,,87
+ASEL, A, AREA,,166
+ESLA
+
+*END
+
+
+
+!Bundle 3
+
+
+
+*CREATE, Bundle3layer1, MAC
+
+ASEL, S, AREA,,88
+ASEL, A, AREA,,90
+ESLA
+
+*END
+
+*CREATE, Bundle3layer2, MAC
+
+ASEL, S, AREA,,89
+ASEL, A, AREA,,195
+ESLA
+
+*END
+
+*CREATE, Bundle3layer3, MAC
+
+ASEL, S, AREA,,91
+ASEL, A, AREA,,196
+ESLA
+
+*END
+
+*CREATE, Bundle3layer4, MAC
+
+ASEL, S, AREA,,92
+ASEL, A, AREA,,197
+ESLA
+
+*END
+
+*CREATE, Bundle3layer5, MAC
+
+ASEL, S, AREA,,93
+ASEL, A, AREA,,198
+ESLA
+
+*END
+
+*CREATE, Bundle3layer6, MAC
+
+ASEL, S, AREA,,94
+ASEL, A, AREA,,199
+ESLA
+
+*END
+
+*CREATE, Bundle3layer7, MAC
+
+ASEL, S, AREA,,95
+ASEL, A, AREA,,200
+ESLA
+
+*END
+
+*CREATE, Bundle3layer8, MAC
+
+ASEL, S, AREA,,96
+ASEL, A, AREA,,201
+ESLA
+
+*END
+
+*CREATE, Bundle3layer9, MAC
+
+ASEL, S, AREA,,97
+ASEL, A, AREA,,202
+ESLA
+
+*END
+
+*CREATE, Bundle3layer10, MAC
+
+ASEL, S, AREA,,98
+ASEL, A, AREA,,203
+ESLA
+
+*END
+
+*CREATE, Bundle3layer11, MAC
+
+ASEL, S, AREA,,99
+ASEL, A, AREA,,204
+ESLA
+
+*END
+
+*CREATE, Bundle3layer12, MAC
+
+ASEL, S, AREA,,100
+ASEL, A, AREA,,205
+ESLA
+
+*END
+
+*CREATE, Bundle3layer13, MAC
+
+ASEL, S, AREA,,101
+ASEL, A, AREA,,206
+ESLA
+
+*END
+
+*CREATE, Bundle3layer14, MAC
+
+ASEL, S, AREA,,102
+ASEL, A, AREA,,207
+ESLA
+
+*END
+
+*CREATE, Bundle3layer15, MAC
+
+ASEL, S, AREA,,103
+ASEL, A, AREA,,208
+ESLA
+
+*END
+
+*CREATE, Bundle3layer16, MAC
+
+ASEL, S, AREA,,104
+ASEL, A, AREA,,209
+ESLA
+
+*END
+
+*CREATE, Bundle3layer17, MAC
+
+ASEL, S, AREA,,105
+ASEL, A, AREA,,210
+ESLA
+
+*END
+
+*CREATE, Bundle3layer18, MAC
+
+ASEL, S, AREA,,106
+ASEL, A, AREA,,211
+ESLA
+
+*END
+
+*CREATE, Bundle3layer19, MAC
+
+ASEL, S, AREA,,107
+ASEL, A, AREA,,212
+ESLA
+
+*END
+
+*CREATE, Bundle3layer20, MAC
+
+ASEL, S, AREA,,108
+ASEL, A, AREA,,213
+ESLA
+
+*END
+
+*CREATE, Bundle3layer21, MAC
+
+ASEL, S, AREA,,109
+ASEL, A, AREA,,214
+ESLA
+
+*END
+
+*CREATE, Bundle3layer22, MAC
+
+ASEL, S, AREA,,110
+ASEL, A, AREA,,215
+ESLA
+
+*END
+
+*CREATE, Bundle3layer23, MAC
+
+ASEL, S, AREA,,111
+ASEL, A, AREA,,216
+ESLA
+
+*END
+
+*CREATE, Bundle3layer24, MAC
+
+ASEL, S, AREA,,112
+ASEL, A, AREA,,217
+ESLA
+
+*END
+
+*CREATE, Bundle3layer25, MAC
+
+ASEL, S, AREA,,113
+ASEL, A, AREA,,218
+ESLA
+
+*END
+
+*CREATE, Bundle3layer26, MAC
+
+ASEL, S, AREA,,114
+ASEL, A, AREA,,219
+ESLA
+
+*END
+
+*CREATE, Bundle3layer27, MAC
+
+ASEL, S, AREA,,115
+ASEL, A, AREA,,167
+ESLA
+
+*END
+
+
+
+!Bundle 4
+
+*CREATE, Bundle4layer1, MAC
+
+ASEL, S, AREA,,116
+ASEL, A, AREA,,118
+ESLA
+
+*END
+
+*CREATE, Bundle4layer2, MAC
+
+ASEL, S, AREA,,117
+ASEL, A, AREA,,220
+ESLA
+
+*END
+
+*CREATE, Bundle4layer3, MAC
+
+ASEL, S, AREA,,119
+ASEL, A, AREA,,221
+ESLA
+
+*END
+
+*CREATE, Bundle4layer4, MAC
+
+ASEL, S, AREA,,120
+ASEL, A, AREA,,222
+ESLA
+
+*END
+
+*CREATE, Bundle4layer5, MAC
+
+ASEL, S, AREA,,121
+ASEL, A, AREA,,223
+ESLA
+
+*END
+
+*CREATE, Bundle4layer6, MAC
+
+ASEL, S, AREA,,122
+ASEL, A, AREA,,224
+ESLA
+
+*END
+
+*CREATE, Bundle4layer7, MAC
+
+ASEL, S, AREA,,123
+ASEL, A, AREA,,225
+ESLA
+
+*END
+
+*CREATE, Bundle4layer8, MAC
+
+ASEL, S, AREA,,124
+ASEL, A, AREA,,226
+ESLA
+
+*END
+
+*CREATE, Bundle4layer9, MAC
+
+ASEL, S, AREA,,125
+ASEL, A, AREA,,227
+ESLA
+
+*END
+
+*CREATE, Bundle4layer10, MAC
+
+ASEL, S, AREA,,126
+ASEL, A, AREA,,228
+ESLA
+
+*END
+
+*CREATE, Bundle4layer11, MAC
+
+ASEL, S, AREA,,127
+ASEL, A, AREA,,229
+ESLA
+
+*END
+
+*CREATE, Bundle4layer12, MAC
+
+ASEL, S, AREA,,128
+ASEL, A, AREA,,230
+ESLA
+
+*END
+
+*CREATE, Bundle4layer13, MAC
+
+ASEL, S, AREA,,129
+ASEL, A, AREA,,231
+ESLA
+
+*END
+
+*CREATE, Bundle4layer14, MAC
+
+ASEL, S, AREA,,130
+ASEL, A, AREA,,232
+ESLA
+
+*END
+
+*CREATE, Bundle4layer15, MAC
+
+ASEL, S, AREA,,131
+ASEL, A, AREA,,233
+ESLA
+
+*END
+
+*CREATE, Bundle4layer16, MAC
+
+ASEL, S, AREA,,132
+ASEL, A, AREA,,234
+ESLA
+
+*END
+
+*CREATE, Bundle4layer17, MAC
+
+ASEL, S, AREA,,133
+ASEL, A, AREA,,235
+ESLA
+
+*END
+
+*CREATE, Bundle4layer18, MAC
+
+ASEL, S, AREA,,134
+ASEL, A, AREA,,236
+ESLA
+
+*END
+
+*CREATE, Bundle4layer19, MAC
+
+ASEL, S, AREA,,135
+ASEL, A, AREA,,237
+ESLA
+
+*END
+
+*CREATE, Bundle4layer20, MAC
+
+ASEL, S, AREA,,136
+ASEL, A, AREA,,238
+ESLA
+
+*END
+
+*CREATE, Bundle4layer21, MAC
+
+ASEL, S, AREA,,137
+ASEL, A, AREA,,239
+ESLA
+
+*END
+
+*CREATE, Bundle4layer22, MAC
+
+ASEL, S, AREA,,138
+ASEL, A, AREA,,240
+ESLA
+
+*END
+
+*CREATE, Bundle4layer23, MAC
+
+ASEL, S, AREA,,139
+ASEL, A, AREA,,241
+ESLA
+
+*END
+
+*CREATE, Bundle4layer24, MAC
+
+ASEL, S, AREA,,140
+ASEL, A, AREA,,242
+ESLA
+
+*END
+
+*CREATE, Bundle4layer25, MAC
+
+ASEL, S, AREA,,141
+ASEL, A, AREA,,243
+ESLA
+
+*END
+
+*CREATE, Bundle4layer26, MAC
+
+ASEL, S, AREA,,142
+ASEL, A, AREA,,244
+ESLA
+
+*END
+
+*CREATE, Bundle4layer27, MAC
+
+ASEL, S, AREA,,143
+ASEL, A, AREA,,168
+ESLA
+
+*END
+
+
+!Bundle 5
+
+*CREATE, Bundle5layer1, MAC
+
+ASEL, S, AREA,,144
+ASEL, A, AREA,,146
+ESLA
+
+*END
+
+*CREATE, Bundle5layer2, MAC
+
+ASEL, S, AREA,,145
+ASEL, A, AREA,,245
+ESLA
+
+*END
+
+*CREATE, Bundle5layer3, MAC
+
+ASEL, S, AREA,,147
+ASEL, A, AREA,,246
+ESLA
+
+*END
+
+*CREATE, Bundle5layer4, MAC
+
+ASEL, S, AREA,,148
+ASEL, A, AREA,,247
+ESLA
+
+*END
+
+*CREATE, Bundle5layer5, MAC
+
+ASEL, S, AREA,,149
+ASEL, A, AREA,,248
+ESLA
+
+*END
+
+*CREATE, Bundle5layer6, MAC
+
+ASEL, S, AREA,,150
+ASEL, A, AREA,,249
+ESLA
+
+*END
+
+*CREATE, Bundle5layer7, MAC
+
+ASEL, S, AREA,,151
+ASEL, A, AREA,,250
+ESLA
+
+*END
+
+*CREATE, Bundle5layer8, MAC
+
+ASEL, S, AREA,,152
+ASEL, A, AREA,,251
+ESLA
+
+*END
+
+*CREATE, Bundle5layer9, MAC
+
+ASEL, S, AREA,,153
+ASEL, A, AREA,,252
+ESLA
+
+*END
+
+*CREATE, Bundle5layer10, MAC
+
+ASEL, S, AREA,,154
+ASEL, A, AREA,,253
+ESLA
+
+*END
+
+*CREATE, Bundle5layer11, MAC
+
+ASEL, S, AREA,,155
+ASEL, A, AREA,,254
+ESLA
+
+*END
+
+*CREATE, Bundle5layer12, MAC
+
+ASEL, S, AREA,,156
+ASEL, A, AREA,,255
+ESLA
+
+*END
+
+*CREATE, Bundle5layer13, MAC
+
+ASEL, S, AREA,,157
+ASEL, A, AREA,,256
+ESLA
+
+*END
+
+*CREATE, Bundle5layer14, MAC
+
+ASEL, S, AREA,,158
+ASEL, A, AREA,,257
+ESLA
+
+*END
+
+*CREATE, Bundle5layer15, MAC
+
+ASEL, S, AREA,,159
+ASEL, A, AREA,,258
+ESLA
+
+*END
+
+*CREATE, Bundle5layer16, MAC
+
+ASEL, S, AREA,,160
+ASEL, A, AREA,,259
+ESLA
+
+*END
+
+*CREATE, Bundle5layer17, MAC
+
+ASEL, S, AREA,,161
+ASEL, A, AREA,,260
+ESLA
+
+*END
+
+*CREATE, Bundle5layer18, MAC
+
+ASEL, S, AREA,,162
+ASEL, A, AREA,,261
+ESLA
+
+*END
+
+*CREATE, Bundle5layer19, MAC
+
+ASEL, S, AREA,,163
+ASEL, A, AREA,,262
+ESLA
+
+*END
+
+*CREATE, Bundle5layer20, MAC
+
+ASEL, S, AREA,,164
+ASEL, A, AREA,,263
+ESLA
+
+*END
+
+*CREATE, Bundle5layer21, MAC
+
+ASEL, S, AREA,,165
+ASEL, A, AREA,,169
+ESLA
+
+*END
+
+
+
+!Selecting and adding all mandrel element
+
+*CREATE, MANDREL, MAC
+
+	ASEL, S, AREA,,59,59		!Bundle 1 mandrel
+	ASEL, A, AREA,,264,264		!Bundle 2 mandrel
+	ASEL, A, AREA,,265,265		!Bundle 3 mandrel
+	ASEL, A, AREA,,266,266		!Bundle 4 mandrel
+	ASEL, A, AREA,,267,267		!Bundle 5 mandrel
+	ESLA
+
+*END
+
+*CREATE, MANDREL_BUNDLE, MAC
+
+	BUNDLE
+	ASEL, A, AREA,,59,59		!Bundle 1 mandrel
+	ASEL, A, AREA,,264,264		!Bundle 2 mandrel
+	ASEL, A, AREA,,265,265		!Bundle 3 mandrel
+	ASEL, A, AREA,,266,266		!Bundle 4 mandrel
+	ASEL, A, AREA,,267,267		!Bundle 5 mandrel
+
+*END
+
+
+BUNDLE
+
+AATT,1,,2		!Material assignment to coil and mandrel
+
+MANDREL
+
+AATT,2,,2		!Overwrite mandrel material assignment to steel or mandrel material
+
+ASEL, S, AREA,,1,4
+ASEL, A, AREA,,268,268
+APLOT
+
+AATT,3,,1		!Assigning material air and using element type 1 (AZ DOF)
+
+
+
+
+
+!Default Element Size
+ASEL, ALL
+AESIZE, ALL, 0.01
+
+
+
+!Coil bundle element size
+MANDREL_BUNDLE
+APLOT
+!AESIZE, ALL, 0.001
+AESIZE, ALL, 0.005
+
+! Element size near coils
+ASEL, S, AREA,,268,268
+APLOT
+!AESIZE, ALL, 0.009
+AESIZE, ALL, 0.02
+
+
+! Element size second near the coils
+ASEL, S, AREA,,1,2
+ASEL, S, AREA,,4
+APLOT
+!AESIZE, ALL, 0.01
+AESIZE, ALL, 0.03
+
+
+ASEL, ALL
+MSHK, 2
+MSHA, 0,2D
+AMESH, ALL
+
+!ASEL, S, AREA,,268
+!APLOT
+!AREFINE,ALL,,,2
+
+
+
+
+
+!Mandrel and bundle refinement
+
+
+
+
+
+!Coil bundle element size
+MANDREL_BUNDLE
+APLOT
+
+AREFINE,ALL,,,2
+
+MANDREL
+AREFINE, ALL,,,2
+
+
+!BUNDLE 1
+
+NSEL, S, LOC, Y, Z1_l-tol,Z1_l+tol
+NSEL, R, LOC, X, R1_i,R1_o
+NPLOT
+!CP, tagcp, UY, ALL
+!tagcp = tagcp+1
+
+NSEL, S, LOC, Y, Z1_h-tol,Z1_h+tol
+NSEL, R, LOC, X, R1_i,R1_o
+NPLOT
+!CP, tagcp, UY, ALL
+!tagcp = tagcp+1
+
+!BUNDLE 2
+
+NSEL, S, LOC, Y, Z2_l-tol,Z2_l+tol
+NSEL, R, LOC, X, R2_i,R2_o
+NPLOT
+!CP, tagcp, UY, ALL
+!tagcp = tagcp+1
+
+NSEL, S, LOC, Y, Z2_h-tol,Z2_h+tol
+NSEL, R, LOC, X, R2_i,R2_o
+NPLOT
+!CP, tagcp, UY, ALL
+!tagcp = tagcp+1
+
+!BUNDLE 3
+
+NSEL, S, LOC, Y, Z3_l-tol,Z3_l+tol
+NSEL, R, LOC, X, R3_i,R3_o
+NPLOT
+!CP, tagcp, UY, ALL
+!tagcp = tagcp+1
+
+NSEL, S, LOC, Y, Z3_h-tol,Z3_h+tol
+NSEL, R, LOC, X, R3_i,R3_o
+NPLOT
+!CP, tagcp, UY, ALL
+!tagcp = tagcp+1
+
+!BUNDLE 4
+
+NSEL, S, LOC, Y, Z4_l-tol,Z4_l+tol
+NSEL, R, LOC, X, R4_i,R4_o
+NPLOT
+!CP, tagcp, UY, ALL
+!tagcp = tagcp+1
+
+NSEL, S, LOC, Y, Z4_h-tol,Z4_h+tol
+NSEL, R, LOC, X, R4_i,R4_o
+NPLOT
+!CP, tagcp, UY, ALL
+!tagcp = tagcp+1
+
+!BUNDLE 5
+
+NSEL, S, LOC, Y, Z5_l-tol,Z5_l+tol
+NSEL, R, LOC, X, R5_i,R5_o
+NPLOT
+!CP, tagcp, UY, ALL
+!tagcp = tagcp+1
+
+NSEL, S, LOC, Y, Z5_h-tol,Z5_h+tol
+NSEL, R, LOC, X, R5_i,R5_o
+NPLOT
+!CP, tagcp, UY, ALL
+!tagcp = tagcp+1
+
+NSEL, S, LOC, X, 3-tol,3+tol
+NPLOT
+!CP, tagcp, AZ, ALL
+!tagcp = tagcp+1
+
+allsel, all
+cdwrite, comb, EMSTRESS, cdb
+
+!cdread,comb,EMSTRESS,cdb
+
+FINISH
+
+/prep7
+
+ET,1,PLANE13,,,1	! Plane13, AZ DOF, AXISYMMETRIC, FOR AIR 
+
+ET,2,PLANE13,,,1
+
+FINISH
+
+/SOLU
+
+/NERR,,99999999,,0,0
+
+ANTYPE, 0
+!CNVTOL, F, ,1e-7
+CNVTOL, CSG, ,1e-7
+
+
+!Flux Parallel BC
+
+LSEL, S, LOC, X,3,3
+LPLOT
+DL, ALL,,AX,0
+
+!Assigning the current density
+
+
+BUNDLE
+APLOT
+ASEL, U, AREA,,144,145
+ASEL, U, AREA,,147,165	
+ASEL, U, AREA,,146,146	!Bundle 5 upper layers
+ASEL, U, AREA,,245,263
+ASEL, U, AREA,,169,169
+APLOT	
+
+ESLA
+EPLOT
+BFE, ALL, JS,,,,118500000
+
+
+ASEL, S, AREA,,144,145	!Bundle 5 lower layers
+ASEL, A, AREA,,147,165	
+
+ASEL, A, AREA,,146,146	!Bundle 5 upper layers
+ASEL, A, AREA,,245,263
+ASEL, A, AREA,,169,169	
+APLOT
+ESLA
+EPLOT
+BFE, ALL, JS,,,,-118500000
+
+
+ALLSEL, ALL
+SAVE
+SOLVE 
+
+
+FINISH
+
+/filename, EMSTRESS_MAG,1
+
+save
+
+/filename, EMSTRESS,1
+
+/PREP7
+ET,2,PLANE182,,,1
+
+/SOLU
+
+/NERR,,99999999,,0,0
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!Define Boundary Condition!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+!fixing the midplane of each bundle Y-directional displacement to zero
+
+!BUNDLE 1
+
+NSEL, S, LOC, Y, ((Z1_l+Z1_h)/2)-tol,((Z1_l+Z1_h)/2)+tol
+NSEL, R, LOC, X, R1_i-Mthick,R1_o
+!NPLOT
+D, ALL, UY, 0 
+
+!BUNDLE 2
+
+NSEL, S, LOC, Y, ((Z2_l+Z2_h)/2)-tol,((Z2_l+Z2_h)/2)+tol
+NSEL, R, LOC, X, R2_i-Mthick,R2_o
+!NPLOT
+D, ALL, UY, 0 
+
+!BUNDLE 3
+
+NSEL, S, LOC, Y, ((Z3_l+Z3_h)/2)-tol,((Z3_l+Z3_h)/2)+tol
+NSEL, R, LOC, X, R3_i-Mthick,R3_o
+!NPLOT
+D, ALL, UY, 0 
+
+!BUNDLE 4
+
+NSEL, S, LOC, Y, ((Z4_l+Z4_h)/2)-tol,((Z4_l+Z4_h)/2)+tol
+NSEL, R, LOC, X, R4_i-Mthick,R4_o
+!NPLOT
+D, ALL, UY, 0 
+
+!BUNDLE 5
+
+NSEL, S, LOC, Y, ((Z5_l+Z5_h)/2)-tol,((Z5_l+Z5_h)/2)+tol
+NSEL, R, LOC, X, R5_i-Mthick,R5_o
+!NPLOT
+D, ALL, UY, 0 
+
+
+ANTYPE, 0 
+TIME2
+NLGEOM, ON
+NROPT, FULL
+
+
+
+MANDREL_BUNDLE
+ESLA
+
+inis,write,1,,,,,epel
+save
+DELTIM, 0.5
+NSUBST, 2
+solve
+
+
+Mandrel_BUNDLE
+APLOT
+ESLA
+EKILL, ALL
+
+
+
+
+e_x = -6.66396000000000e-05
+e_y = -6.42872844000000e-05
+e_z = 0.000203655600000000
+
+
+/NERR,,99999999,,0,0
+
+MANDREL
+ESLA
+EALIVE, ALL
+
+FINISH
+
+
+
+*DO, j,1, Bundle_1
+
+	/SOLU
+	/DELET, EMSTRESS,rst
+	Time, j+3
+	DELTIM, 0.5
+	NSUBST, 2
+
+	inis,read,EMSTRESS,ist
+	*DO, i,1,4				!4
+		layer = 'Bundle%i%layer%j%'
+		layer
+		ESLA
+		EALIVE, ALL
+		inistate,set,dtyp,epel
+		inistate,defi,,,,,e_x,e_y,e_z
+	*ENDDO
+	*IF, j, LE,21, THEN
+		layer = 'Bundle5layer%j%'
+		layer
+		ESLA
+		EALIVE, ALL
+		inistate,set,dtyp,epel
+		inistate,defi,,,,,e_x,e_y,e_z
+	*ENDIF
+	
+
+	MANDREL_BUNDLE
+	ESLA
+	inis,write,1,,,,,epel
+	SAVE
+	SOLVE
+
+	FINISH
+
+*ENDDO
+
+
+FINISH
+
+/filename, EMSTRESS_WINDING,1
+
+save
+
+/filename, EMSTRESS,1
+
+/SOLU
+
+/NERR,,99999999,,0,0
+
+!Thermal Cooling
+
+TIME, j+4
+MANDREL_BUNDLE
+ESLA
+TUNIF, -288
+SAVE
+SOLVE
+
+FINISH
+
+/filename, EMSTRESS_cooling,1
+
+save
+
+/filename, EMSTRESS,1
+
+/solu
+
+/NERR,,99999999,,0,0
+
+!!!!!!Electromag
+
+TIME, j+5
+ALLSEL, ALL
+LDREAD,FORC,,,,,,rmg,,
+MANDREL_BUNDLE
+ESLA
+EPLOT
+
+
+
+SAVE
+SOLVE
+
+FINISH
+
+/filename, EMSTRESS,1
+
+save
+
+/post1
+
+PATH, COIL1, 2,50,50
+PPATH,1,,(R1_i-MTHICK),(Z1_h+Z1_l)/2,0
+PPATH,2,,R1_o,(Z1_h+Z1_l)/2,0
+PDEF,S_X,S,X
+PDEF,S_y,S,Y
+PDEF,S_z,S,Z
+PDEF,S_XY,S,XY
+PDEF,S_YZ,S,YZ
+PDEF,S_XZ,S,XZ
+PDEF,S_1,S,1
+PDEF,S_3,S,3
+PDEF,S_vm,S,EQV
+PDEF, e_1st_th,EPTH,1 
+PDEF, e_z_th,EPTH,z 
+PDEF,e_vm_th,EPTH,EQV
+PDEF,e_r_tot,EPTO,x
+PDEF,e_y_tot,EPTO,y
+PDEF,e_z_tot,EPTO,z
+PDEF,e_xy_tot,EPTO,xy
+PDEF,e_yz_tot,EPTO,yz
+PDEF,e_xz_tot,EPTO,xz
+PDEF,e_1st_tot,EPTO,1
+PDEF,e_2nd_tot,EPTO,2
+PDEF,e_3rd_tot,EPTO,3
+PDEF,e_vm_tot,EPTO,EQV
+PDEF,e_in_tot,EPTO,INT
+PRPATH, S_X, S_Z, S_1, S_3, S_VM
+PRPATH, e_r_tot, e_1st_tot, e_3rd_to, e_vm_tot, e_z_tot
+
+PATH, COIL2, 2,50,50
+PPATH,1,,(R2_i-MTHICK),(Z2_h+Z2_l)/2,0
+PPATH,2,,R2_o,(Z2_h+Z2_l)/2,0
+PDEF,S_X,S,X
+PDEF,S_z,S,Z
+PDEF,S_1,S,1
+PDEF,S_3,S,3
+PDEF,S_vm,S,EQV
+PDEF, e_1st_th,EPTH,1 
+PDEF, e_z_th,EPTH,z 
+PDEF,e_vm_th,EPTH,EQV
+PDEF,e_r_tot,EPTO,x
+PDEF,e_1st_tot,EPTO,1
+PDEF,e_3rd_tot,EPTO,3
+PDEF,e_vm_tot,EPTO,EQV
+PDEF,e_z_tot,EPTO,z
+PLPATH, e_1st_tot, e_1st_th
+PRPATH, S_X, S_Z, S_1, S_3, S_VM
+PRPATH, e_r_tot, e_1st_tot, e_3rd_to, e_vm_tot, e_z_tot
+
+PATH, COIL3, 2,50,50
+PPATH,1,,R3_i-MTHICK,(Z3_h+Z3_l)/2,0
+PPATH,2,,R3_o,(Z3_h+Z3_l)/2,0
+PDEF,S_X,S,X
+PDEF,S_z,S,Z
+PDEF,S_1,S,1
+PDEF,S_3,S,3
+PDEF,S_vm,S,EQV
+PDEF, e_1st_th,EPTH,1 
+PDEF, e_z_th,EPTH,z 
+PDEF,e_vm_th,EPTH,EQV
+PDEF,e_r_tot,EPTO,x
+PDEF,e_1st_tot,EPTO,1
+PDEF,e_3rd_tot,EPTO,3
+PDEF,e_vm_tot,EPTO,EQV
+PDEF,e_z_tot,EPTO,z
+PLPATH, e_1st_tot, e_1st_th
+PRPATH, S_X, S_Z, S_1, S_3, S_VM
+PRPATH, e_r_tot, e_1st_tot, e_3rd_to, e_vm_tot, e_z_tot
+
+PATH, COIL4, 2,50,50
+PPATH,1,,R4_i-MTHICK,(Z4_h+Z4_l)/2,0
+PPATH,2,,R4_o,(Z4_h+Z4_l)/2,0
+PDEF,S_X,S,X
+PDEF,S_z,S,Z
+PDEF,S_1,S,1
+PDEF,S_3,S,3
+PDEF,S_vm,S,EQV
+PDEF, e_1st_th,EPTH,1 
+PDEF, e_z_th,EPTH,z 
+PDEF,e_vm_th,EPTH,EQV
+PDEF,e_r_tot,EPTO,x
+PDEF,e_1st_tot,EPTO,1
+PDEF,e_3rd_tot,EPTO,3
+PDEF,e_vm_tot,EPTO,EQV
+PDEF,e_z_tot,EPTO,z
+PLPATH, e_1st_tot, e_1st_th
+PRPATH, S_X, S_Z, S_1, S_3, S_VM
+PRPATH, e_r_tot, e_1st_tot, e_3rd_to, e_vm_tot, e_z_tot
+
+PATH, COIL5, 2,50,50
+PPATH,1,,R5_i-MTHICK,(Z5_h+Z5_l)/2,0
+PPATH,2,,R5_o,(Z5_h+Z5_l)/2,0
+PDEF,S_X,S,X
+PDEF,S_z,S,Z
+PDEF,S_1,S,1
+PDEF,S_3,S,3
+PDEF,S_vm,S,EQV
+PDEF, e_1st_th,EPTH,1 
+PDEF, e_z_th,EPTH,z 
+PDEF,e_vm_th,EPTH,EQV
+PDEF,e_r_tot,EPTO,x
+PDEF,e_1st_tot,EPTO,1
+PDEF,e_3rd_tot,EPTO,3
+PDEF,e_vm_tot,EPTO,EQV
+PDEF,e_z_tot,EPTO,z
+PLPATH, e_1st_tot, e_1st_th
+PRPATH, S_X, S_Z, S_1, S_3, S_VM
+PRPATH, e_r_tot, e_1st_tot, e_3rd_to, e_vm_tot, e_z_tot
